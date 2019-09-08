@@ -11,28 +11,29 @@
  *     limitations under the License.
  */
 
-
 import Foundation
+import UIKit
+
 
 /**
   Creates action objects for push notifications
  */
 public class BMSPushNotificationAction : NSObject {
-   
+
     // MARK: - Properties
-    
+
     public static let sharedInstance = BMSPushClient()
-    
+
     var identifier: String
     var title: String
     var authenticationRequired: Bool?
     var activationMode: UIUserNotificationActivationMode
-    
+
     // MARK: Initializers
-    
+
     /**
      Initialze Method -  Deprecated.
-     
+
      - parameter identifierName: identifier name for your actions.
      - parameter title: Title for your actions.
      - parameter authenticationRequired: Authenticationenbling option for your actions.

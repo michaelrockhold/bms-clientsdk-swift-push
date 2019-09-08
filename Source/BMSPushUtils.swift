@@ -13,25 +13,26 @@
 
 import UIKit
 import BMSCore
+import BMSAnalyticsAPI
 
 // MARK: - Swift 3 & Swift 4
 
 #if swift(>=3.0)
-    
+
 /**
      Utils class for `BMSPush`
  */
 open class BMSPushUtils: NSObject {
-    
+
     static var loggerMessage:String = ""
-    
+
     @objc dynamic open class func saveValueToNSUserDefaults (value:Any, key:String) {
         UserDefaults.standard.set(value, forKey: key)
         UserDefaults.standard.synchronize()
         loggerMessage = ("Saving value to NSUserDefaults with Key: \(key) and Value: \(value)")
         self.sendLoggerData()
     }
-    
+
     @objc dynamic open class func getValueToNSUserDefaults (key:String) -> Any {
         var value:Any = ""
         if(UserDefaults.standard.value(forKey: key) != nil){
@@ -41,7 +42,7 @@ open class BMSPushUtils: NSObject {
         self.sendLoggerData()
         return value
     }
-    
+
     @objc dynamic open class func getPushOptionsNSUserDefaults (key:String) -> String {
         var value = ""
         if key == IMFPUSH_VARIABLES {
@@ -58,14 +59,14 @@ open class BMSPushUtils: NSObject {
         self.sendLoggerData()
         return value
     }
-    
+
     class func getPushSettingValue() -> Bool {
-        
-        
+
+
         var pushEnabled = false
-        
+
         if  ((UIDevice.current.systemVersion as NSString).floatValue >= 8.0) {
-            
+
             if (UIApplication.shared.isRegisteredForRemoteNotifications) {
                 pushEnabled = true
             }
@@ -73,9 +74,9 @@ open class BMSPushUtils: NSObject {
                 pushEnabled = false
             }
         } else {
-            
+
             let grantedSettings = UIApplication.shared.currentUserNotificationSettings
-            
+
             if grantedSettings!.types.rawValue & UIUserNotificationType.alert.rawValue != 0 {
                 // Alert permission granted
                 pushEnabled = true
@@ -84,31 +85,31 @@ open class BMSPushUtils: NSObject {
                 pushEnabled = false
             }
         }
-        
+
         return pushEnabled;
     }
-    
+
     class func sendLoggerData () {
-        
+
         let devId = BMSPushClient.sharedInstance.getDeviceID()
         let testLogger = Logger.logger(name:devId)
         Logger.logLevelFilter = LogLevel.debug
         testLogger.debug(message: loggerMessage)
         Logger.logLevelFilter = LogLevel.info
         testLogger.info(message: loggerMessage)
-        
+
     }
-    
+
     class func checkTemplateNotifications(_ body:String) -> String {
-        
+
         let regex = "\\{\\{.*?\\}\\}"
         var text = body
-        
+
         guard let optionVariables = UserDefaults.standard.value(forKey: IMFPUSH_VARIABLES) as? [String: String] else { return text }
-        
+
         do {
             let regex = try NSRegularExpression(pattern: regex)
-            
+
             let results = regex.matches(in: text,
                                         range: NSRange(text.startIndex..., in: text))
             let resultMap = results.flatMap {
@@ -116,19 +117,19 @@ open class BMSPushUtils: NSObject {
                     String(text[$0])
                 }
             }
-            
+
             for val in resultMap {
                 var temp = val
                 temp = temp.replacingOccurrences(of: "{{", with: "", options: NSString.CompareOptions.literal, range: nil)
                 temp = temp.replacingOccurrences(of: "}}", with: "", options: NSString.CompareOptions.literal, range: nil)
                 temp = temp.replacingOccurrences(of: " ", with: "", options: NSString.CompareOptions.literal, range: nil)
-                
+
                 if let templateValue = optionVariables[temp] {
                     text = text.replacingOccurrences(of: val , with: templateValue)
                 }
             }
             return text
-            
+
         } catch {
             return text
         }
@@ -148,22 +149,22 @@ open class BMSPushUtils: NSObject {
 // MARK: - Swift 2
 
 #else
-    
+
 /**
  Utils class for `BMSPush`
  */
 internal class BMSPushUtils: NSObject {
-    
+
     static var loggerMessage:String = ""
-    
+
     class func saveValueToNSUserDefaults (value:String, key:String) {
-        
+
         NSUserDefaults.standardUserDefaults().setObject(value, forKey: key)
         NSUserDefaults.standardUserDefaults().synchronize()
         loggerMessage = ("Saving value to NSUserDefaults with Key: \(key) and Value: \(value)")
         self.sendLoggerData()
     }
-    
+
     class func getValueToNSUserDefaults (key:String) -> String{
         var value = ""
         if(NSUserDefaults.standardUserDefaults().valueForKey(key) != nil) {
@@ -173,14 +174,14 @@ internal class BMSPushUtils: NSObject {
         self.sendLoggerData()
         return value ;
     }
-    
+
     class func getPushSettingValue() -> Bool {
-        
-        
+
+
         var pushEnabled = false
-        
+
         if  ((UIDevice.currentDevice().systemVersion as NSString).floatValue >= 8.0) {
-            
+
             if (UIApplication.sharedApplication().isRegisteredForRemoteNotifications()) {
                 pushEnabled = true
             }
@@ -188,9 +189,9 @@ internal class BMSPushUtils: NSObject {
                 pushEnabled = false
             }
         } else {
-            
+
             let grantedSettings = UIApplication.sharedApplication().currentUserNotificationSettings()
-            
+
             if grantedSettings!.types.rawValue & UIUserNotificationType.Alert.rawValue != 0 {
                 // Alert permission granted
                 pushEnabled = true
@@ -199,22 +200,22 @@ internal class BMSPushUtils: NSObject {
                 pushEnabled = false
             }
         }
-        
+
         return pushEnabled;
     }
-    
+
     class func sendLoggerData () {
-        
+
         let devId = BMSPushClient.sharedInstance.getDeviceID()
         let testLogger = Logger.logger(name: devId)
         Logger.logLevelFilter = LogLevel.debug
         testLogger.debug(message: loggerMessage)
         Logger.logLevelFilter = LogLevel.info
         testLogger.info(message: loggerMessage)
-        
+
     }
-    
-    
+
+
 }
 
 
